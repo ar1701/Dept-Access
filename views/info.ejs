@@ -41,7 +41,7 @@
         <div class="row g-3">
           <div class="col-md-3">
             <select class="form-select" id="yearFilter">
-              <option value="">All Years</option>
+              <option value="">Year of admission</option>
               <% [...new Set(allInfo.map(item =>
               item.yearOfAdmission))].sort().forEach(year => { %>
               <option><%= year %></option>
@@ -50,7 +50,7 @@
           </div>
           <div class="col-md-2">
             <select class="form-select" id="semesterFilter">
-              <option value="">All Semesters</option>
+              <option value="">Select Sem</option>
               <% [...Array(8).keys()].map(i => i+1).forEach(sem => { %>
               <option><%= sem %></option>
               <% }) %>
@@ -58,14 +58,14 @@
           </div>
           <div class="col-md-2">
             <select class="form-select" id="feeFilter">
-              <option value="">All Fee Status</option>
+              <option value="">Fee Due</option>
               <option>Yes</option>
               <option>No</option>
             </select>
           </div>
           <div class="col-md-2">
             <select class="form-select" id="verifiedFilter">
-              <option value="">All Verification</option>
+              <option value="">Verified Status</option>
               <option>Yes</option>
               <option>No</option>
             </select>
@@ -75,7 +75,7 @@
               type="text"
               class="form-control"
               id="searchInput"
-              placeholder="Search..."
+              placeholder="Search by name or reg....."
             />
           </div>
         </div>
@@ -88,6 +88,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Registration Number</th>
+                    <th>Year of Admission</th>
                     <th>Fee Due</th>
                     <th>Verified</th>
                     <th>Actions</th>
@@ -108,6 +109,7 @@
                       data-father="<%= student.fatherName %>">
                       <td><%= student.name %></td>
                       <td><%= student.registrationNumber %></td>
+                      <td><%= student.yearOfAdmission %></td>
                       <td>
                           <span class="badge <%= student.feeDue === 'Yes' ? 'bg-danger' : 'bg-success' %>">
                               <%= student.feeDue %>

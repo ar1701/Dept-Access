@@ -110,30 +110,46 @@ app.post("/main", async (req, res) => {
   try {
     const { name, department, designation, phone, accessCode, username, password } = req.body;
     
-    // Check if user already exists
+    // Check if user already exists with exact same details
     const existingUser = await DeptAccess.findOne({
-      $or: [
-        { name },
-        {department},
-        { designation },
-        { phone },
-        { accessCode }
+      $and: [
+        { name: name },
+        { department: department },
+        { designation: designation },
+        { phone: phone },
+        { accessCode: accessCode }
       ]
     });
 
     if (existingUser) {
-      const conflicts = [];
-      if (existingUser.username === username) conflicts.push("username");
-      if (existingUser.phone === phone) conflicts.push("phone");
-      if (existingUser.accessCode === accessCode) conflicts.push("access code");
-      
       return res.status(409).json({
         success: false,
-        message: `User with same ${conflicts.join(", ")} already exists`
+        message: "A user with these exact details already exists"
       });
     }
 
-    // Create new department access user
+    // Check for any conflicts in unique fields
+    const uniqueFieldConflicts = await DeptAccess.findOne({
+      $or: [
+        { username: username },
+        { phone: phone },
+        { accessCode: accessCode }
+      ]
+    });
+
+    if (uniqueFieldConflicts) {
+      const conflicts = [];
+      if (uniqueFieldConflicts.username === username) conflicts.push("username");
+      if (uniqueFieldConflicts.phone === phone) conflicts.push("phone");
+      if (uniqueFieldConflicts.accessCode === accessCode) conflicts.push("access code");
+      
+      return res.status(409).json({
+        success: false,
+        message: `Another user exists with the same ${conflicts.join(", ")}`
+      });
+    }
+
+    // If no conflicts, create new department access user
     const deptUser = new DeptAccess({
       name,
       department,
@@ -152,20 +168,21 @@ app.post("/main", async (req, res) => {
 
     // After successful registration, log the user in
     req.login(deptUser, (err) => {
-        if (err) {
-            return res.status(500).json({ 
-                success: false, 
-                message: "Error logging in after registration" 
-            });
-        }
-        res.redirect("/info");
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "Error logging in after registration" 
+        });
+      }
+      res.redirect("/info");
     });
+
   } catch (error) {
     console.error("Error in registration:", error);
     res.status(500).json({ 
-        success: false, 
-        message: "Internal server error", 
-        error: error.message 
+      success: false, 
+      message: "Internal server error", 
+      error: error.message 
     });
   }
 });

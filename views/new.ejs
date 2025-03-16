@@ -147,7 +147,7 @@
 
     <nav class="navbar">
         <div class="nav-links">
-            <a href="/main"><i class="fas fa-home"></i>Home</a>
+            <a href="/home"><i class="fas fa-home"></i>Home</a>
             <a href="/info"><i class="fas fa-sign-in-alt"></i>List of Students</a>
             <a href="/contact"><i class="fas fa-envelope"></i>Contact</a>
         </div>
@@ -213,8 +213,8 @@
                     <div class="mb-3">
                         <label class="form-label">Branch</label>
                         <div class="input-group">
-                            <input type="hidden" name="branch" value="CSE">
-                            <input type="text" class="form-control" value="CSE" disabled>
+                            <input type="hidden" name="branch" value=<%= currentUser.department %> >
+                            <input type="text" class="form-control" value=<%= currentUser.department %> disabled>
                             <i class="fas fa-building input-icon"></i>
                         </div>
                     </div>
@@ -266,6 +266,7 @@
 
             <button type="submit" class="submit-btn mt-4">Create Account</button>
             
+
         </form>
     </div>
 
