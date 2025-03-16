@@ -1,250 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Management System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        .nav-container {
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-link {
-            color: #4a5568 !important;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .main-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .filter-section {
-            background: rgba(243, 244, 246, 0.5);
-            border-radius: 15px;
-            padding: 1.5rem;
-        }
-
-        .student-table {
-            border-collapse: separate;
-            border-spacing: 0 10px;
-        }
-
-        .student-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-        }
-
-        .student-table td {
-            background: rgba(255, 255, 255, 0.9);
-            vertical-align: middle;
-        }
-
-        .status-badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
-
-        .badge-success {
-            background: #48bb78;
-            color: white;
-        }
-
-        .badge-warning {
-            background: #ecc94b;
-            color: black;
-        }
-
-        .btn-filter {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 10px;
-        }
-    </style>
-</head>
-<body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/navbar.css" />
+    <link rel="stylesheet" href="/css/home.css" />
+  </head>
+  <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg nav-container mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;">
-                SMS Dashboard
-            </a>
-            <div class="d-flex align-items-center">
-                <% if(currentUser) { %>
-                    <span class="me-3">Welcome, <%= currentUser.name %></span>
-                    <a href="/logout" class="btn btn-sm btn-filter">Logout</a>
-                <% } else { %>
-                    <a href="/login" class="btn btn-sm btn-filter">Login</a>
-                <% } %>
-            </div>
+    <nav class="navbar">
+      <div class="nav-links">
+        <div class="nav-left">
+          <a href="/home" class="active btn btn-outline-dark"><i class="fas fa-home me-2"></i>Home</a>
+          <a href="/info" class="active btn btn-primary"><i class="fas fa-users me-2"></i>Manage Students</a>
+          <a href="/new" class="active btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>Add Student
+          </a>
         </div>
+        <div class="nav-right mx-5">
+          <span class="welcome-text">
+            <i class="fas fa-user me-2"></i>Welcome, <%= currentUser.name %>
+          </span>
+          <a href="/logout" class="btn btn-secondary">
+            <i class="fas fa-sign-out-alt me-2"></i>Logout
+          </a>
+        </div>
+      </div>
     </nav>
 
-    <div class="container">
-        <div class="main-container p-4">
-            <!-- Filter Section -->
-            <div class="filter-section mb-4">
-                <h4 class="mb-3">Filter Students</h4>
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <select class="form-select" id="filterYear">
-                            <option value="">Year of Admission</option>
-                            <% for(let year = 2020; year <= new Date().getFullYear(); year++) { %>
-                                <option value="<%= year %>"><%= year %></option>
-                            <% } %>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="filterSemester">
-                            <option value="">Select Semester</option>
-                            <% for(let sem = 1; sem <= 8; sem++) { %>
-                                <option value="<%= sem %>">Semester <%= sem %></option>
-                            <% } %>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="filterFee">
-                            <option value="">Fee Due</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="filterVerified">
-                            <option value="">Verification Status</option>
-                            <option value="Yes">Verified</option>
-                            <option value="No">Not Verified</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Student Table -->
-            <div class="table-responsive">
-                <table class="student-table table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Reg No.</th>
-                            <th>Branch</th>
-                            <th>Semester</th>
-                            <th>Admission Year</th>
-                            <th>Fee Due</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentTableBody">
-                        <% allInfo.forEach(student => { %>
-                            <tr>
-                                <td><%= student.name %></td>
-                                <td><%= student.registrationNumber %></td>
-                                <td><%= student.branch %></td>
-                                <td><%= student.semester %></td>
-                                <td><%= student.yearOfAdmission %></td>
-                                <td>
-                                    <span class="status-badge <%= student.feeDue === 'Yes' ? 'badge-warning' : 'badge-success' %>">
-                                        <%= student.feeDue %>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="status-badge <%= student.verified === 'Yes' ? 'badge-success' : 'badge-warning' %>">
-                                        <%= student.verified %>
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-filter">View Details</button>
-                                </td>
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            </div>
+    <div class="container py-4 mt-5">
+      <div class="view-options">
+        <div class="view-card" onclick="showFilter('year')">
+          <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+          <h3>Year of Admission</h3>
+          <p class="text-muted">Filter students by admission year</p>
         </div>
+
+        <div class="view-card" onclick="showFilter('fee')">
+          <i class="fas fa-money-bill-wave fa-2x text-primary"></i>
+          <h3>Fee Due Status</h3>
+          <p class="text-muted">View fee payment status</p>
+        </div>
+
+        <div class="view-card" onclick="showFilter('verified')">
+          <i class="fas fa-check-circle fa-2x text-primary"></i>
+          <h3>Verification Status</h3>
+          <p class="text-muted">Check student verification</p>
+        </div>
+      </div>
+
+      <!-- Dynamic Filter Section -->
+      <div class="filter-section" id="filterSection" style="display: none">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-4">
+            <select class="form-select" id="selectedFilter">
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100" onclick="loadData()">
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Table -->
+      <div class="table-container" id="resultsSection" style="display: none">
+        <table class="student-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Reg Number</th>
+              <th>Branch</th>
+              <th>Year of Admission</th>
+              <th>Verification</th>
+            </tr>
+          </thead>
+          <tbody id="dataBody">
+            <!-- Data populated dynamically -->
+          </tbody>
+        </table>
+        <div class="pagination-container" id="pagination"></div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Filter functionality
-        const filters = {
-            year: document.getElementById('filterYear'),
-            semester: document.getElementById('filterSemester'),
-            fee: document.getElementById('filterFee'),
-            verified: document.getElementById('filterVerified')
-        };
+      // Global variables
+      let currentPage = 1;
+      const pageSize = 10;
+      let allData = [];
+      let currentView = "";
+      let currentFilter = "";
 
-        function updateFilters() {
-            const params = new URLSearchParams();
-            
-            if(filters.year.value) params.append('yearOfAdmission', filters.year.value);
-            if(filters.semester.value) params.append('semester', filters.semester.value);
-            if(filters.fee.value) params.append('feeDue', filters.fee.value);
-            if(filters.verified.value) params.append('verified', filters.verified.value);
+      // DOM Elements
+      const filterSection = document.getElementById("filterSection");
+      const selectedFilter = document.getElementById("selectedFilter");
+      const resultsSection = document.getElementById("resultsSection");
+      const dataBody = document.getElementById("dataBody");
+      const paginationElement = document.getElementById("pagination");
 
-            fetch(`/students/<%= currentUser.department %>?${params.toString()}`)
-                .then(response => response.json())
-                .then(data => updateTable(data))
-                .catch(error => console.error('Error:', error));
+      // Show filter options based on selected view
+      function showFilter(viewType) {
+        currentView = viewType;
+        filterSection.style.display = "block";
+        selectedFilter.innerHTML = "";
+
+        switch (viewType) {
+          case "year":
+            selectedFilter.innerHTML = `
+                        <option value="">Select Admission Year</option>
+                        <% for(let year = 2020; year <= new Date().getFullYear(); year++) { %>
+                            <option value="<%= year %>"><%= year %></option>
+                        <% } %>
+                    `;
+            break;
+
+          case "fee":
+            selectedFilter.innerHTML = `
+                        <option value="">Select Fee Status</option>
+                        <option value="Yes">Fee Due</option>
+                        <option value="No">No Due</option>
+                    `;
+            break;
+
+          case "verified":
+            selectedFilter.innerHTML = `
+                        <option value="">Select Verification Status</option>
+                        <option value="Yes">Verified</option>
+                        <option value="No">Not Verified</option>
+                    `;
+            break;
         }
+      }
 
-        function updateTable(students) {
-            const tbody = document.getElementById('studentTableBody');
-            tbody.innerHTML = students.map(student => `
+      // Load data from server
+      async function loadData() {
+        const filterValue = selectedFilter.value;
+        if (!filterValue) return;
+
+        currentFilter = filterValue;
+        try {
+          const response = await fetch(
+            `/students/<%= currentUser.department %>?filter=${currentView}&value=${filterValue}`
+          );
+          allData = await response.json();
+
+          if (allData.length > 0) {
+            renderTable();
+            updatePagination();
+            resultsSection.style.display = "block";
+          } else {
+            resultsSection.style.display = "none";
+            Swal.fire(
+              "No Results",
+              "No students match the selected criteria",
+              "info"
+            );
+          }
+        } catch (error) {
+          console.error("Error loading data:", error);
+          Swal.fire("Error", "Failed to load student data", "error");
+        }
+      }
+
+      // Render table with current page data
+      function renderTable() {
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = allData.slice(start, end);
+
+        dataBody.innerHTML = pageData
+          .map(
+            (student) => `
                 <tr>
                     <td>${student.name}</td>
                     <td>${student.registrationNumber}</td>
                     <td>${student.branch}</td>
-                    <td>${student.semester}</td>
                     <td>${student.yearOfAdmission}</td>
                     <td>
-                        <span class="status-badge ${student.feeDue === 'Yes' ? 'badge-warning' : 'badge-success'}">
-                            ${student.feeDue}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="status-badge ${student.verified === 'Yes' ? 'badge-success' : 'badge-warning'}">
+                        <span class="badge ${
+                          student.verified === "Yes"
+                            ? "bg-success"
+                            : "bg-warning"
+                        }">
                             ${student.verified}
                         </span>
                     </td>
-                    <td>
-                        <button class="btn btn-sm btn-filter">View Details</button>
-                    </td>
                 </tr>
-            `).join('');
+            `
+          )
+          .join("");
+      }
+
+      // Update pagination controls
+      function updatePagination() {
+        const totalPages = Math.ceil(allData.length / pageSize);
+        paginationElement.innerHTML = "";
+
+        // Previous button
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+          currentPage - 1
+        })">Previous</a>`;
+        paginationElement.appendChild(prevLi);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+          const li = document.createElement("li");
+          li.className = `page-item ${currentPage === i ? "active" : ""}`;
+          li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+          paginationElement.appendChild(li);
         }
 
-        // Add event listeners to all filters
-        Object.values(filters).forEach(filter => {
-            filter.addEventListener('change', updateFilters);
+        // Next button
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${
+          currentPage === totalPages ? "disabled" : ""
+        }`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+          currentPage + 1
+        })">Next</a>`;
+        paginationElement.appendChild(nextLi);
+      }
+
+      // Change page handler
+      function changePage(newPage) {
+        if (newPage < 1 || newPage > Math.ceil(allData.length / pageSize))
+          return;
+        currentPage = newPage;
+        renderTable();
+        updatePagination();
+      }
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        // Add event listeners
+        selectedFilter.addEventListener("change", loadData);
+
+        // Initialize any default view if needed
+        // showFilter('year'); // Uncomment if you want a default view
+      });
+
+      // Error handling function
+      function handleError(error) {
+        console.error("Error:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+          footer: error.message,
         });
+      }
     </script>
-</body>
+  </body>
 </html>

@@ -16,20 +16,28 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
+    <link rel="stylesheet" href="/css/navbar.css" />
     <link rel="stylesheet" href="/css/info.css" />
     
   </head>
   <body>
     <nav class="navbar">
       <div class="nav-links">
-        <a href="/home"><i class="fas fa-home me-2"></i>Home</a>
-<a href="/new" class="btn btn-primary">
-  <i class="fas fa-plus-circle me-2"></i>Add Student
-</a>
-<a href="/logout" class="btn btn-secondary">
-  <i class="fas fa-sign-out-alt me-2"></i>Logout
-</a>
-
+        <div class="nav-left">
+          <a href="/home" class="active btn btn-outline-dark"><i class="fas fa-home me-2"></i>Home</a>
+          <a href="/info" class="active btn btn-primary"><i class="fas fa-users me-2"></i>Manage Students</a>
+          <a href="/new" class="active btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>Add Student
+          </a>
+        </div>
+        <div class="nav-right mx-5">
+          <span class="welcome-text btn btn-warning" style="color: #212529; background-color: #ffc107; border-color: #ffc107;">
+            <i class="fas fa-user me-2"></i>Welcome, <%= currentUser.name %>
+          </span>
+          <a href="/logout" class="btn btn-secondary">
+            <i class="fas fa-sign-out-alt me-2"></i>Logout
+          </a>
+        </div>
       </div>
     </nav>
 
@@ -38,10 +46,11 @@
 
       <!-- Filters -->
       <div class="filters-container">
-        <div class="row g-3">
-          <div class="col-md-3">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-2">
+            <label class="form-label">Year</label>
             <select class="form-select" id="yearFilter">
-              <option value="">Year of admission</option>
+              <option value="">All Years</option>
               <% [...new Set(allInfo.map(item =>
               item.yearOfAdmission))].sort().forEach(year => { %>
               <option><%= year %></option>
@@ -49,34 +58,43 @@
             </select>
           </div>
           <div class="col-md-2">
+            <label class="form-label">Semester</label>
             <select class="form-select" id="semesterFilter">
-              <option value="">Select Sem</option>
+              <option value="">All Semesters</option>
               <% [...Array(8).keys()].map(i => i+1).forEach(sem => { %>
               <option><%= sem %></option>
               <% }) %>
             </select>
           </div>
           <div class="col-md-2">
+            <label class="form-label">Fee Status</label>
             <select class="form-select" id="feeFilter">
-              <option value="">Fee Due</option>
+              <option value="">All Status</option>
               <option>Yes</option>
               <option>No</option>
             </select>
           </div>
           <div class="col-md-2">
+            <label class="form-label">Verification</label>
             <select class="form-select" id="verifiedFilter">
-              <option value="">Verified Status</option>
+              <option value="">All Status</option>
               <option>Yes</option>
               <option>No</option>
             </select>
           </div>
           <div class="col-md-3">
+            <label class="form-label">Search</label>
             <input
               type="text"
               class="form-control"
               id="searchInput"
               placeholder="Search by name or reg....."
             />
+          </div>
+          <div class="col-md-1 text-end">
+            <button class="btn btn-secondary btn-sm" onclick="resetFilters()">
+              <i class="fas fa-undo-alt me-1"></i>Reset
+            </button>
           </div>
         </div>
       </div>
@@ -116,9 +134,16 @@
                           </span>
                       </td>
                       <td>
-                          <span class="badge <%= student.verified === 'Yes' ? 'bg-success' : 'bg-warning' %>">
-                              <%= student.verified %>
-                          </span>
+                          <select class="form-select form-select-sm verified-select" 
+                                  onchange="updateVerifiedStatus(this, '<%= student._id %>', '<%= student.branch %>')"
+                                  style="width: auto; min-width: 100px;">
+                              <option value="Yes" <%= student.verified === 'Yes' ? 'selected' : '' %>>
+                                  Yes
+                              </option>
+                              <option value="No" <%= student.verified === 'No' ? 'selected' : '' %>>
+                                  No
+                              </option>
+                          </select>
                       </td>
                       <td class="actions">
                           <button class="btn btn-primary btn-sm" onclick="showAllDetails('<%= student._id %>')">

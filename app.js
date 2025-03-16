@@ -242,6 +242,35 @@ app.delete('/students/:branch/:id', async (req, res) => {
   }
 });
 
+app.get('/students/:branch', async (req, res) => {
+  try {
+      const { filter, value } = req.query;
+      const branchModel = {
+          CE: ce, CSE: cse, IT: it, SFE: sfe, 
+          ME: me, EEE: eee, EC: ec
+      }[req.params.branch];
+
+      let query = {};
+      if (filter && value) {
+          switch(filter) {
+              case 'year':
+                  query.yearOfAdmission = value;
+                  break;
+              case 'fee':
+                  query.feeDue = value;
+                  break;
+              case 'verified':
+                  query.verified = value;
+                  break;
+          }
+      }
+
+      const students = await branchModel.find(query);
+      res.json(students);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
 // Create student
 app.post('/students/:branch', async (req, res) => {
   try {
@@ -444,7 +473,7 @@ app.post("/login", async (req, res, next) => {
         const branch = branchModels[user.department];
         const allInfo = await branch.find();
 
-        res.render("info", { allInfo });
+        res.redirect("/home");
       });
     })(req, res, next);
 

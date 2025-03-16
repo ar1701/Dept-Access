@@ -222,17 +222,24 @@ async function deleteStudent(id, branch) {
   }
 }
 
-// Edit a student
+// Update the editStudent function to include dynamic year dropdown
 async function editStudent(id, branch) {
   try {
     const response = await fetch(`/students/${branch}/${id}`);
     const student = await response.json();
 
+    // Get current year for the year dropdown
+    const currentYear = new Date().getFullYear();
+    const yearOptions = [];
+    for (let y = 2020; y <= currentYear; y++) {
+      yearOptions.push(`<option value="${y}" ${student.yearOfAdmission == y ? 'selected' : ''}>${y}</option>`);
+    }
+
     const formHtml = `
       <form id="editForm" class="text-start">
         <div class="mb-3">
           <label class="form-label">Name</label>
-          <input type="text" class="form-control" id="editName" value="${student.name}" required>
+          <input type="text" id="editName" class="form-control" value="${student.name}" required>
         </div>
         <div class="mb-3">
           <label class="form-label">Email</label>
@@ -256,7 +263,9 @@ async function editStudent(id, branch) {
         </div>
         <div class="mb-3">
           <label class="form-label">Year of Admission</label>
-          <input type="number" class="form-control" id="editYear" value="${student.yearOfAdmission}" required>
+          <select id="editYear" class="form-select" required>
+            ${yearOptions.join('')}
+          </select>
         </div>
         <div class="mb-3">
           <label class="form-label">Last Semester GPA</label>
@@ -312,6 +321,17 @@ async function editStudent(id, branch) {
     });
 
     if (formData) {
+      // Show loading state
+    //   Swal.fire({
+    //     title: 'Updating...',
+    //     text: 'Please wait while we update the student record',
+    //     allowOutsideClick: false,
+    //     showConfirmButton: false,
+    //     willOpen: () => {
+    //       Swal.showLoading();
+    //     }
+    //   });
+
       const response = await fetch(`/students/${branch}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -320,12 +340,129 @@ async function editStudent(id, branch) {
 
       if (!response.ok) throw new Error('Update failed');
 
-      await response.json();
-      location.reload(); // Refresh to show updated entry
+      // Show success notification
+      const toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+
+      await toast.fire({
+        icon: 'success',
+        title: 'Student record updated successfully!'
+      });
+
+      location.reload();
     }
   } catch (error) {
-    Swal.fire('Error!', error.message, 'error');
+    Swal.fire({
+      icon: 'error',
+      title: 'Update Failed',
+      text: error.message,
+      confirmButtonColor: '#4f46e5'
+    });
   }
+}
+
+// Add this function to handle verified status updates
+async function updateVerifiedStatus(selectElement, studentId, branch) {
+    try {
+        const newStatus = selectElement.value;
+        selectElement.disabled = true;
+
+        // Show loading state
+        const loadingToast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        loadingToast.fire({
+            title: 'Updating verification status...'
+        });
+        
+        const response = await fetch(`/students/${branch}/${studentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                verified: newStatus
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to update verification status');
+
+        // Show success notification
+        const toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        await toast.fire({
+            icon: 'success',
+            title: `Verification status updated to ${newStatus}`
+        });
+
+        selectElement.closest('tr').dataset.verified = newStatus;
+        filterTable();
+        
+    } catch (error) {
+        // Show error notification
+        Swal.fire({
+            icon: 'error',
+            title: 'Update Failed',
+            text: error.message,
+            confirmButtonColor: '#4f46e5'
+        });
+        
+        // Revert the select to its previous value
+        selectElement.value = selectElement.closest('tr').dataset.verified;
+    } finally {
+        selectElement.disabled = false;
+    }
+}
+
+// Add reset filters function
+function resetFilters() {
+  // Reset all filter inputs
+  yearFilter.value = '';
+  semesterFilter.value = '';
+  feeFilter.value = '';
+  verifiedFilter.value = '';
+  searchInput.value = '';
+
+  // Show success notification
+  const toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true
+  });
+
+  toast.fire({
+    icon: 'success',
+    title: 'Filters have been reset'
+  });
+
+  // Re-filter the table
+  filterTable();
 }
 
 // Initialize on page load
