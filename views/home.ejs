@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .nav-container {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link {
+            color: #4a5568 !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-section {
+            background: rgba(243, 244, 246, 0.5);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .student-table {
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .student-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .student-table td {
+            background: rgba(255, 255, 255, 0.9);
+            vertical-align: middle;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .badge-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ecc94b;
+            color: black;
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg nav-container mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;">
+                SMS Dashboard
+            </a>
+            <div class="d-flex align-items-center">
+                <% if(currentUser) { %>
+                    <span class="me-3">Welcome, <%= currentUser.name %></span>
+                    <a href="/logout" class="btn btn-sm btn-filter">Logout</a>
+                <% } else { %>
+                    <a href="/login" class="btn btn-sm btn-filter">Login</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-container p-4">
+            <!-- Filter Section -->
+            <div class="filter-section mb-4">
+                <h4 class="mb-3">Filter Students</h4>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterYear">
+                            <option value="">Year of Admission</option>
+                            <% for(let year = 2020; year <= new Date().getFullYear(); year++) { %>
+                                <option value="<%= year %>"><%= year %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterSemester">
+                            <option value="">Select Semester</option>
+                            <% for(let sem = 1; sem <= 8; sem++) { %>
+                                <option value="<%= sem %>">Semester <%= sem %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterFee">
+                            <option value="">Fee Due</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterVerified">
+                            <option value="">Verification Status</option>
+                            <option value="Yes">Verified</option>
+                            <option value="No">Not Verified</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Table -->
+            <div class="table-responsive">
+                <table class="student-table table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Reg No.</th>
+                            <th>Branch</th>
+                            <th>Semester</th>
+                            <th>Admission Year</th>
+                            <th>Fee Due</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <% allInfo.forEach(student => { %>
+                            <tr>
+                                <td><%= student.name %></td>
+                                <td><%= student.registrationNumber %></td>
+                                <td><%= student.branch %></td>
+                                <td><%= student.semester %></td>
+                                <td><%= student.yearOfAdmission %></td>
+                                <td>
+                                    <span class="status-badge <%= student.feeDue === 'Yes' ? 'badge-warning' : 'badge-success' %>">
+                                        <%= student.feeDue %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge <%= student.verified === 'Yes' ? 'badge-success' : 'badge-warning' %>">
+                                        <%= student.verified %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-filter">View Details</button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Filter functionality
+        const filters = {
+            year: document.getElementById('filterYear'),
+            semester: document.getElementById('filterSemester'),
+            fee: document.getElementById('filterFee'),
+            verified: document.getElementById('filterVerified')
+        };
+
+        function updateFilters() {
+            const params = new URLSearchParams();
+            
+            if(filters.year.value) params.append('yearOfAdmission', filters.year.value);
+            if(filters.semester.value) params.append('semester', filters.semester.value);
+            if(filters.fee.value) params.append('feeDue', filters.fee.value);
+            if(filters.verified.value) params.append('verified', filters.verified.value);
+
+            fetch(`/students/<%= currentUser.department %>?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => updateTable(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateTable(students) {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.name}</td>
+                    <td>${student.registrationNumber}</td>
+                    <td>${student.branch}</td>
+                    <td>${student.semester}</td>
+                    <td>${student.yearOfAdmission}</td>
+                    <td>
+                        <span class="status-badge ${student.feeDue === 'Yes' ? 'badge-warning' : 'badge-success'}">
+                            ${student.feeDue}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${student.verified === 'Yes' ? 'badge-success' : 'badge-warning'}">
+                            ${student.verified}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-filter">View Details</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Add event listeners to all filters
+        Object.values(filters).forEach(filter => {
+            filter.addEventListener('change', updateFilters);
+        });
+    </script>
+</body>
+</html>
