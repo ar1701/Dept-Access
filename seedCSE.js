@@ -12,7 +12,7 @@ const dummyData = [
         registrationNumber: "CSE22001",
         branch: "CSE",
         semester: 4,
-        yearOfAdmission: 2022,
+        yearOfAdmission: 2021,
         lastSemGPA: 8.5,
         cgpa: 8.7,
         feeDue: "No",
