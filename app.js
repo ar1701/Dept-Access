@@ -42,13 +42,19 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Add session and passport configuration before your routes
+const MongoStore = require('connect-mongo');
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: DB_URL,
+        touchAfter: 24 * 3600 // Only update session once per day
+    }),
     cookie: {
         httpOnly: true,
-        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }));
@@ -66,6 +72,14 @@ passport.deserializeUser(DeptAccess.deserializeUser());
 app.use((req, res, next) => {
     res.locals.currentUser = req.user;
     next();
+});
+
+app.use((req, res, next) => {
+  // Refresh session expiration time with each request
+  if (req.session) {
+      req.session.touch();
+  }
+  next();
 });
 
 // Authentication middleware
@@ -99,17 +113,17 @@ app.get("/home", isLoggedIn, async (req, res) => {
 
 // Routes
 app.get("/main", (req, res) => {
-  res.render("main");
+  res.render("main", {error:null});
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  res.render("login",  { error: null });
 } );
 
 app.post("/main", async (req, res) => {
   try {
     const { name, department, designation, phone, accessCode, username, password } = req.body;
-    
+
     // Check if user already exists with exact same details
     const existingUser = await DeptAccess.findOne({
       $and: [
@@ -122,10 +136,7 @@ app.post("/main", async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "A user with these exact details already exists"
-      });
+      return res.render("main", { error: "A user with these exact details already exists" });
     }
 
     // Check for any conflicts in unique fields
@@ -142,11 +153,8 @@ app.post("/main", async (req, res) => {
       if (uniqueFieldConflicts.username === username) conflicts.push("username");
       if (uniqueFieldConflicts.phone === phone) conflicts.push("phone");
       if (uniqueFieldConflicts.accessCode === accessCode) conflicts.push("access code");
-      
-      return res.status(409).json({
-        success: false,
-        message: `Another user exists with the same ${conflicts.join(", ")}`
-      });
+
+      return res.render("main", { error: `Another user exists with the same ${conflicts.join(", ")}` });
     }
 
     // If no conflicts, create new department access user
@@ -166,24 +174,25 @@ app.post("/main", async (req, res) => {
     deptUser.lastLogin = new Date();
     await deptUser.save();
 
+    req.session.user = {
+      id: deptUser._id,
+      username: deptUser.username,
+      department: deptUser.department,
+      name: deptUser.name,
+      designation: deptUser.designation
+    };
+
     // After successful registration, log the user in
     req.login(deptUser, (err) => {
       if (err) {
-        return res.status(500).json({ 
-          success: false, 
-          message: "Error logging in after registration" 
-        });
+        return res.render("main", { error: "Error logging in after registration" });
       }
-      res.redirect("/info");
+      res.redirect("/home");
     });
 
   } catch (error) {
     console.error("Error in registration:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Internal server error", 
-      error: error.message 
-    });
+    res.render("main", { error: "Invalid Details" });
   }
 });
 
@@ -408,10 +417,7 @@ app.post("/login", async (req, res, next) => {
     // First, find user in DeptAccess by username
     const deptUser = await DeptAccess.findOne({ username });
     if (!deptUser) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Invalid credentials" 
-      });
+      return res.render("login", { error: "Invalid credentials" }); // Pass error message
     }
 
     // Then, find matching faculty in FacultyAccess using accessCode
@@ -424,10 +430,7 @@ app.post("/login", async (req, res, next) => {
     });
 
     if (!faculty) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Faculty verification failed" 
-      });
+      return res.render("login", { error: "Faculty verification failed" }); // Pass error message
     }
 
     // If both checks pass, proceed with passport authentication
@@ -436,10 +439,7 @@ app.post("/login", async (req, res, next) => {
         return next(err);
       }
       if (!user) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Invalid username or password" 
-        });
+        return res.render("login", { error: "Invalid username or password" }); // Pass error message
       }
 
       req.logIn(user, async (err) => {
@@ -460,30 +460,14 @@ app.post("/login", async (req, res, next) => {
           designation: user.designation
         };
 
-        // Get department data and render info page
-        const branchModels = {
-          CE: ce,
-          CSE: cse,
-          IT: it,
-          SFE: sfe,
-          ME: me,
-          EEE: eee,
-          EC: ec,
-        };
-        const branch = branchModels[user.department];
-        const allInfo = await branch.find();
-
+        // Redirect to home page
         res.redirect("/home");
       });
     })(req, res, next);
 
   } catch (error) {
     console.error("Error in login route:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Internal server error", 
-      error: error.message 
-    });
+    res.render("login", { error: "Internal server error" }); // Pass error message
   }
 });
 

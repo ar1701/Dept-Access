@@ -85,7 +85,7 @@ const dummyData = [
 ];
 
 // Generate more dummy data programmatically
-for (let i = 6; i <= 20; i++) {
+for (let i = 6; i <= 40; i++) {
     const year = 2020 + Math.floor(Math.random() * 4); // Random year between 2020-2023
     const semester = Math.ceil((2024 - year) * 2); // Calculate semester based on year
     const regNo = `CSE${year.toString().slice(-2)}${i.toString().padStart(3, '0')}`;

@@ -46,6 +46,12 @@ body {
   backdrop-filter: blur(10px);
 }
 
+.display-4 {
+  font-weight: 900;
+  font-family:cursive;
+  color: white  ;
+}
+
 /* Table Styles */
 .table-container {
   background: rgba(255, 255, 255, 0.9);

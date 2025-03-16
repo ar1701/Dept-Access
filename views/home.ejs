@@ -21,7 +21,7 @@
   </head>
   <body>
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar mb-5">
       <div class="nav-links">
         <div class="nav-left">
           <a href="/home" class="active btn btn-outline-dark"><i class="fas fa-home me-2"></i>Home</a>
@@ -41,7 +41,32 @@
       </div>
     </nav>
 
-    <div class="container py-4 mt-5">
+    <!-- Hero Section -->
+    <div class="hero-section text-center py-5 mt-5">
+      <h1 class="display-4">
+        Welcome to the 
+        <% if (currentUser.department === 'CSE') { %>
+          Computer Science Department
+        <% } else if (currentUser.department === 'CE') { %>
+          Civil Engineering Department
+        <% } else if (currentUser.department === 'IT') { %>
+          Information Technology Department
+        <% } else if (currentUser.department === 'SFE') { %>
+          Safety & Fire Engineering Department
+        <% } else if (currentUser.department === 'ME') { %>
+          Mechanical Engineering Department
+        <% } else if (currentUser.department === 'EEE') { %>
+          Electrical and Electronics Engineering Department
+        <% } else if (currentUser.department === 'EC') { %>
+          Electronics and Communication Engineering Department
+        <% } else { %>
+          Department
+        <% } %>
+      </h1>
+      <p class="lead">Manage your students efficiently and effectively.</p>
+    </div>
+
+    <div class="container py-4">
       <div class="view-options">
         <div class="view-card" onclick="showFilter('year')">
           <i class="fas fa-calendar-alt fa-2x text-primary"></i>

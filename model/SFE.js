@@ -73,6 +73,6 @@ const studentSchema = new mongoose.Schema({
 studentSchema.plugin(passportLocalMongoose);
 
 // Create the Mongoose model
-const sfe = mongoose.model("SFE", studentSchema);
+const sfe = mongoose.model("safety", studentSchema);
 
 module.exports = sfe;
