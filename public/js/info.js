@@ -216,6 +216,7 @@ function showAllDetails(id) {
     yearOfAdmission: row.dataset.year,
     lastSemGPA: row.dataset.gpa,
     cgpa: row.dataset.cgpa,
+    backlog: row.dataset.backlog,
     feeDue: row.dataset.feeDue,
     fatherName: row.dataset.father,
     verified: row.dataset.verified,
@@ -232,6 +233,7 @@ function showAllDetails(id) {
       <p><strong>Year of Admission:</strong> ${student.yearOfAdmission}</p>
       <p><strong>Last Semester GPA:</strong> ${student.lastSemGPA}</p>
       <p><strong>CGPA:</strong> ${student.cgpa}</p>
+      <p><strong>Backlogs:</strong> ${student.backlog}</p>
       <p><strong>Fee Due:</strong> ${student.feeDue}</p>
       <p><strong>Father's Name:</strong> ${student.fatherName}</p>
       <p><strong>Verified:</strong> ${student.verified}</p>
@@ -353,6 +355,12 @@ async function editStudent(id, branch) {
           }" required>
         </div>
         <div class="mb-3">
+          <label class="form-label">Number of Backlogs</label>
+          <input type="number" min="0" class="form-control" id="editBacklog" value="${
+            student.backlog
+          }" required>
+        </div>
+        <div class="mb-3">
           <label class="form-label">Fee Due</label>
           <select class="form-select" id="editFeeDue">
             <option value="Yes" ${
@@ -400,6 +408,7 @@ async function editStudent(id, branch) {
           yearOfAdmission: document.getElementById("editYear").value,
           lastSemGPA: document.getElementById("editGPA").value,
           cgpa: document.getElementById("editCGPA").value,
+          backlog: document.getElementById("editBacklog").value,
           feeDue: document.getElementById("editFeeDue").value,
           fatherName: document.getElementById("editFather").value,
           verified: document.getElementById("editVerified").value,
@@ -409,15 +418,15 @@ async function editStudent(id, branch) {
 
     if (formData) {
       // Show loading state
-      //   Swal.fire({
-      //     title: 'Updating...',
-      //     text: 'Please wait while we update the student record',
-      //     allowOutsideClick: false,
-      //     showConfirmButton: false,
-      //     willOpen: () => {
-      //       Swal.showLoading();
-      //     }
-      //   });
+      Swal.fire({
+        title: "Updating...",
+        text: "Please wait while we update the student record",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
       const response = await fetch(`/students/${branch}/${id}`, {
         method: "PUT",

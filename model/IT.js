@@ -49,6 +49,12 @@ const studentSchema = new mongoose.Schema({
     min: 0,
     max: 10, // CGPA range validation
   },
+  backlog: {
+    type: Number,
+    required: true,
+    min: 0,
+    default: 0, // Default value is 0 backlogs
+  },
   feeDue: {
     type: String,
     required: true,

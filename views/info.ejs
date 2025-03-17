@@ -121,6 +121,7 @@
                     <th>Registration Number</th>
                     <th>Year of Admission</th>
                     <th>Fee Due</th>
+                    <th>Backlog</th>
                     <th>Verified</th>
                     <th>Actions</th>
                 </tr>
@@ -137,6 +138,7 @@
                       data-branch="<%= student.branch %>"
                       data-gpa="<%= student.lastSemGPA %>"
                       data-cgpa="<%= student.cgpa %>"
+                      data-backlog="<%= student.backlog %>"
                       data-father="<%= student.fatherName %>">
                       <td><%= student.name %></td>
                       <td><%= student.registrationNumber %></td>
@@ -144,6 +146,11 @@
                       <td>
                           <span class="badge <%= student.feeDue === 'Yes' ? 'bg-danger' : 'bg-success' %>">
                               <%= student.feeDue %>
+                          </span>
+                      </td>
+                      <td>
+                          <span class="badge <%= student.backlog > 0 ? 'bg-danger' : 'bg-success' %>">
+                              <%= student.backlog %>
                           </span>
                       </td>
                       <td>
