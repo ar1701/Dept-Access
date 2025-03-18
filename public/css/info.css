@@ -25,9 +25,10 @@ h1 {
 .filters-container {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 15px;
-  padding: 1.5rem;
+  padding: 1rem;
   margin: 1rem 0;
   backdrop-filter: blur(10px);
+  width: 1300px;
 }
 
 .form-label {
@@ -65,6 +66,7 @@ h1 {
   padding: 1.5rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
+  width: 1300px;
 }
 
 .faculty-table {
